@@ -15,8 +15,14 @@ export default async function handler(req, res) {
       return;
     }
 
-    const hashedPassword = await hashPassword(password);
     const db = await connectToDatabase();
+    const existingUser = await db.collection('users').findOne({ email: email });
+    if (existingUser) {
+      res.status(422).json({ message: 'User already exists!' });
+      return;
+    }
+
+    const hashedPassword = await hashPassword(password);
     await db.collection('users').insertOne({
       email,
       password: hashedPassword,
